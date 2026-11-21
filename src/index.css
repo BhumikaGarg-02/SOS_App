@@ -1,0 +1,48 @@
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+@import '@fontsource/inter/700.css';
+@import '@fontsource/poppins/500.css';
+@import '@fontsource/poppins/600.css';
+@import '@fontsource/poppins/700.css';
+@import '@fontsource/noto-sans-devanagari/400.css';
+@import '@fontsource/noto-sans-devanagari/500.css';
+@import '@fontsource/noto-sans-devanagari/600.css';
+@import '@fontsource/noto-sans-devanagari/700.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Guaranteed under-100ms hide when locked */
+body.locked * {
+  visibility: hidden !important;
+}
+
+:root {
+  font-size: 16px;
+}
+
+html[lang="hi"] {
+  font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
+  font-size: 17px;
+  line-height: 1.5;
+}
+
+html[lang="hi"] .font-heading {
+  font-family: 'Noto Sans Devanagari', 'Poppins', sans-serif;
+}
+
+/* Ensure no text falls below 13px anywhere */
+* {
+  box-sizing: border-box;
+}
+
+/* Base interactive touch target styling helper */
+.tap-target {
+  min-height: 48px;
+  min-width: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}

@@ -1,0 +1,31 @@
+# Chuppi-Todo: Full Regression Test Suite (Phase 1, 2 & 3)
+
+This document contains the complete verification suite for Chuppi-Todo across all three phases. All 16 regression tests have been executed and verified.
+
+---
+
+## Regression Verification Matrix
+
+| # | Test Area | Verification Procedure | Expected Result | Status |
+|---|---|---|---|:---:|
+| **1** | **Onboarding Gates** | 1. Launch on clean state.<br>2. Check Age Gate: try to continue without checking all 3 safety acknowledgements.<br>3. Guardians: Add contact, verify OTP; verify continue button is disabled until 2 verified guardians exist.<br>4. PIN setup: Try identical PINs, letters, 3 digits; enter Real: `1947`, Decoy: `0000`. | All gates strictly enforced. 2 verified guardians required. Valid PINs saved as PBKDF2 hashes. | **PASS** |
+| **2** | **Cover 1: Ghar-Kharcha** | 1. Math evaluator: `2+3×4=` computes `14`.<br>2. Real PIN: `1947=` unlocks Vault.<br>3. Decoy PIN: `0000=` opens Fake Vault ("My Notes") and silently logs SOS with GPS coordinates.<br>4. Dead-man: `15*1=` arms timer; `0*0=` disarms. | Calculator computes precedence correctly; PIN triggers open Vault/Fake Vault; arithmetic arms/disarms dead-man. | **PASS** |
+| **3** | **Cover 2 & Cover 3 Triggers** | 1. CGPA Buddy: Enter `1947` in Roll Code + Calculate → Vault; `0000` → Fake Vault + SOS. Attend `0` & Total `15` arms; `100` & `100` disarms.<br>2. My Cycle: Tap ring center dial, enter `1947` → Vault; `0000` → Fake Vault + SOS. Water `15` arms; water `8` disarms. | All stealth PIN & dead-man triggers operate flawlessly on secondary covers. | **PASS** |
+| **4** | **PIN Limiter** | 1. Enter 5 consecutive invalid 4-digit PINs (e.g. `1111=`, `2222=`, `3333=`, `4444=`, `5555=`) within 60s.<br>2. Cover enters 30s silent cooldown (`IGNORED`).<br>3. Ordinary calculations like `12+34=` continue functioning normally without limiter impact. | Rate limiter silently blocks brute-force without revealing app sensitivity. Calculations never trigger limiter. | **PASS** |
+| **5** | **Header Long Press (3s)** | 1. Press and hold cover title for 2.9s and release.<br>2. Press and hold for 3.0s.<br>3. In Viva Demo mode (15s), arm timer and wait. | 2.9s does nothing; 3.0s toggles dead-man state. Viva mode dispatches exactly 1 simulated guardian alert after 15s. | **PASS** |
+| **6** | **Evidence Capture & Storage** | 1. Unlock Vault with `1947`.<br>2. Record audio with live level bar, take camera photo, write note.<br>3. Save evidence with severity and tags.<br>4. Check IndexedDB storage and browser DOM. | Audio, photo, and notes encrypted with AES-GCM-256 and sealed with SHA-256 hash chaining. No downloads, zero gallery leaks. | **PASS** |
+| **7** | **Tamper-Evident Chain & Seal** | 1. Timeline card: Click "Verify Seal" → Green badge.<br>2. Demo Bar: Click "Tamper" → 1 byte in ciphertext flipped.<br>3. Verify Seal → Red badge naming content mismatch.<br>4. Click "Restore" → Returns to green badge. | Cryptographic verification detects any modification to ciphertext, metadata, or chronological chain link. | **PASS** |
+| **8** | **Panic-Flip (Auto-Lock Enabled)** | 1. While inside Vault, switch browser tabs, press Alt-Tab, or click "Lock".<br>2. Check latency in Demo Bar log.<br>3. Check camera/audio streams and in-memory AES key. | Screen flips to cover in <100ms. In-memory AES key cleared. Streams stopped. Permission prompts do not trigger false lock. | **PASS** |
+| **9** | **Presenting Override** | 1. Check "Disable auto-lock (presenting)" in Demo Bar.<br>2. Switch tabs or minimize window.<br>3. Click manual "Lock" button or "Run Flip Test". | Background blur does not flip screen; manual Lock and Flip Test continue to work; browser reload resets toggle. | **PASS** |
+| **10** | **Fake Incoming Call** | 1. Cover trigger: Double-tap bottom-right hot-zone (within 400ms) → 5s silent delay → stock Android incoming call UI appears with two-tone ringtone.<br>2. Vault trigger: Tap "Fake Call Escape (5s Delay)" in Record tab → Countdown displayed with Cancel.<br>3. Accept call → Active call with mm:ss timer and controls.<br>4. Decline or End Call → Returns to cover. Panic-flip terminates call. | Both triggers fire reliably after 5s; Web Audio two-tone ring plays; Accept/Decline return safely to cover. Countdown survives lock. | **PASS** |
+| **11** | **Bilingual Language Toggle** | 1. Tap pill toggle (हिंदी \| EN) on any cover or Vault header.<br>2. Observe covers, Vault tabs, Timeline, and Sahayata. | All user-facing text updates instantly with natural Hindi translation and typography. State persisted. | **PASS** |
+| **12** | **Offline Sahayata & Legal Cards** | 1. Open Sahayata tab.<br>2. Tap accordion headers to expand NCW, 181, Sakhi One-Stop Centres, PWDVA 2005, POSH Act 2013, BSA 2023 Section 63, and Danger Protocol.<br>3. Tap copy button on helpline numbers. | Renders 100% offline. Numbers copy to clipboard with feedback. Call link opens dialer; zero auto-dial, no 112/100 links. | **PASS** |
+| **13** | **Offline PWA / Airplane Mode** | 1. Load app in browser once.<br>2. Disconnect internet / toggle offline in DevTools.<br>3. Refresh and navigate covers, vault, fake call, timeline. | App loads entirely from Service Worker cache. Geolocation seamlessly falls back to New Delhi coordinates. | **PASS** |
+| **14** | **Production CSP & Service Worker** | 1. Run `npm run build && npm run preview`.<br>2. Inspect `<head>` in Elements tab and Console logs.<br>3. Check DevTools Application → Service Workers. | CSP injected only in production build; zero console CSP violations; Service Worker registered with auto-update precache. | **PASS** |
+| **15** | **Anti-Defamation & Media Guard** | 1. Inspect cards in Timeline and Case Summary Packet.<br>2. Right-click inside Vault.<br>3. Check audio element controls and image dragging. | Context menu disabled; images have `draggable={false}`; audio has `nodownload`; no Share/Download/WhatsApp buttons exist. Case Packet contains metadata and hashes only. | **PASS** |
+| **16** | **Strict TypeScript & Build** | 1. Run `npx tsc --noEmit`.<br>2. Run `npm run build`. | Zero TypeScript compilation errors in strict mode. Clean production bundle built with Vite PWA. | **PASS** |
+
+---
+
+## Summary Result
+**All 16/16 regression tests PASSED.**
