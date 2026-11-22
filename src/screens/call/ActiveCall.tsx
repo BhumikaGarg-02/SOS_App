@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { PhoneOff, Mic, MicOff, Volume2, Grid } from 'lucide-react';
 import { useAppStore } from '../../store/appStore';
+import { stopRingtone } from '../../lib/ringtone';
 import { useDemoLogStore } from '../../store/demoLogStore';
 import { useT } from '../../i18n/useT';
 
@@ -29,6 +30,7 @@ export const ActiveCall: React.FC = () => {
   };
 
   const handleEndCall = () => {
+    stopRingtone();
     addLog(`Fake call with ${fakeCallerName} ended after ${formatDuration(seconds)}`, 'info');
     setScreen(returnTo);
   };

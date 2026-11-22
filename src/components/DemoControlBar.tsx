@@ -22,22 +22,25 @@ import { useDemoFlagsStore } from '../store/demoFlagsStore';
 import { isArmed, remaining, arm, disarm, forceExpire } from '../lib/deadman';
 import { silentSOS } from '../lib/sos';
 import { lockNow } from '../lib/panic';
-import { resetDatabase, getEvidence, saveEvidence, type EvidenceRecord } from '../lib/db';
+import { resetDatabase } from '../lib/db';
 import { getLimiterStatus } from '../lib/pinGuard';
 import { getSessionKey } from '../lib/crypto';
 import { createEvidence } from '../lib/seal';
+import { EmailConfigSection } from './EmailConfigSection';
+import {
+  tamperNewestRecord,
+  restoreTamperedRecord,
+  hasAnyTampered,
+  clearAllTamperBackups,
+} from '../lib/tamperDemo';
 import type { GpsMode } from '../lib/geo';
-
-let tamperedRecordBackup: {
-  id: string;
-  cipher: ArrayBuffer | Uint8Array | string;
-} | null = null;
 
 export const DemoControlBar: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [copied, setCopied] = useState(false);
   const [remTime, setRemTime] = useState<number>(0);
   const [isSeeding, setIsSeeding] = useState(false);
+  const [tamperActive, setTamperActive] = useState<boolean>(() => hasAnyTampered());
   const [limiterInfo, setLimiterInfo] = useState({
     isCoolingDown: false,
     attemptsCount: 0,
@@ -73,7 +76,16 @@ export const DemoControlBar: React.FC = () => {
       setRemTime(remaining());
       setLimiterInfo(getLimiterStatus());
     }, 500);
-    return () => clearInterval(timer);
+
+    const handleUpdate = () => {
+      setTamperActive(hasAnyTampered());
+    };
+    window.addEventListener('chuppi-evidence-updated', handleUpdate);
+
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener('chuppi-evidence-updated', handleUpdate);
+    };
   }, [deadmanEndsAt]);
 
   if (isDemoDisabled) {
@@ -92,6 +104,7 @@ export const DemoControlBar: React.FC = () => {
   const handleResetApp = async () => {
     if (window.confirm('Reset all app data, keys, and return to Onboarding?')) {
       localStorage.clear();
+      await clearAllTamperBackups();
       await resetDatabase();
       window.location.reload();
     }
@@ -251,72 +264,13 @@ export const DemoControlBar: React.FC = () => {
   };
 
   const handleTamper = async () => {
-    const records = await getEvidence();
-    if (records.length === 0) {
-      useDemoLogStore
-        .getState()
-        .addLog('No evidence records found to tamper with', 'warn');
-      return;
-    }
-
-    const target = records[Math.floor(records.length / 2)] || records[0];
-    tamperedRecordBackup = { id: target.id, cipher: target.cipher };
-
-    let raw: Uint8Array;
-    if (target.cipher instanceof ArrayBuffer) {
-      raw = new Uint8Array(target.cipher.slice(0));
-    } else if (target.cipher instanceof Uint8Array) {
-      raw = new Uint8Array(target.cipher);
-    } else {
-      raw = new TextEncoder().encode(target.cipher as string);
-    }
-    raw[0] ^= 0xff;
-
-    const tampered: EvidenceRecord = {
-      ...target,
-      cipher: raw.buffer as ArrayBuffer,
-    };
-    await saveEvidence(tampered);
-
-    useDemoLogStore
-      .getState()
-      .addLog(
-        `Tampered record ${target.id} (flipped byte in ciphertext) — seal check should fail`,
-        'warn'
-      );
+    await tamperNewestRecord();
+    setTamperActive(hasAnyTampered());
   };
 
   const handleRestore = async () => {
-    if (!tamperedRecordBackup) {
-      useDemoLogStore
-        .getState()
-        .addLog('No tampered record to restore', 'warn');
-      return;
-    }
-
-    const records = await getEvidence();
-    const target = records.find((r) => r.id === tamperedRecordBackup!.id);
-    if (!target) {
-      useDemoLogStore
-        .getState()
-        .addLog('Tampered record not found in database', 'warn');
-      tamperedRecordBackup = null;
-      return;
-    }
-
-    const restored: EvidenceRecord = {
-      ...target,
-      cipher: tamperedRecordBackup.cipher,
-    };
-    await saveEvidence(restored);
-
-    useDemoLogStore
-      .getState()
-      .addLog(
-        `Restored record ${tamperedRecordBackup.id} ciphertext — seal is valid again`,
-        'info'
-      );
-    tamperedRecordBackup = null;
+    await restoreTamperedRecord();
+    setTamperActive(hasAnyTampered());
   };
 
   const armed = isArmed();
@@ -487,6 +441,11 @@ export const DemoControlBar: React.FC = () => {
             </div>
           </div>
 
+          {/* Email Alerts (EmailJS) Live Config Section */}
+          <div className="pt-2">
+            <EmailConfigSection compact={false} />
+          </div>
+
           {/* Phase 2: Evidence Engine Controls */}
           <div className="pt-2 space-y-1.5">
             <div className="text-[10px] font-bold tracking-wider text-gray-400 uppercase">
@@ -513,7 +472,8 @@ export const DemoControlBar: React.FC = () => {
               <button
                 type="button"
                 onClick={handleRestore}
-                className="py-1.5 px-1 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded border border-emerald-200 font-semibold text-[10px] flex items-center justify-center gap-1"
+                disabled={!tamperActive}
+                className="py-1.5 px-1 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 disabled:opacity-40 disabled:cursor-not-allowed rounded border border-emerald-200 font-semibold text-[10px] flex items-center justify-center gap-1"
               >
                 <RefreshCw className="w-2.5 h-2.5" />
                 <span>Restore</span>

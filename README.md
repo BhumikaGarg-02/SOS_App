@@ -14,7 +14,38 @@
 - **Cryptography**: Web Crypto API (PBKDF2-SHA256 with 210,000 iterations, AES-GCM-256, SHA-256 tamper-evident hash chaining)
 - **Fonts**: `@fontsource/inter`, `@fontsource/poppins`, `@fontsource/noto-sans-devanagari` (100% bundled offline, zero external CDNs)
 - **Audio Engine**: Web Audio API two-tone telephone synthesizer (440 Hz & 480 Hz) with vibration fallback
-- **Zero Backend**: No remote servers, no analytics, no external trackers, no paid APIs. Everything works offline.
+- **Email Alert Network Exception**: Edge-first client-side delivery via EmailJS (`@emailjs/browser`) for emergency guardian alerts. All other app functions (encryption, evidence recording, tamper verification, decoy notes, and routing) remain 100% offline and client-side.
+
+---
+
+## Email Alerts Configuration (EmailJS)
+
+The application utilizes EmailJS (`@emailjs/browser`) to deliver emergency emails directly to verified guardians.
+
+### 1. Template Setup
+In your EmailJS dashboard, create a template with the following fields:
+- **To Email**: `{{to_email}}`
+- **Subject**: `{{subject}}`
+- **Template Body Variables**:
+  - `{{to_name}}` — Guardian's full name
+  - `{{message_body}}` — Dual-language (English + Hindi) alert body or incident summary
+  - `{{alert_type}}` — `GUARDIAN_OTP`, `DECOY_COERCION_SOS`, `DEADMAN_TIMER_EXPIRED`, or `CASE_SUMMARY_PACKET`
+  - `{{timestamp}}` — Local time in IST (e.g., `22 Nov 2026, 12:45:00 pm IST`)
+  - `{{gps_link}}` — Google Maps URL (or `N/A`)
+
+### 2. Free-Tier Quota & Behavior
+- Free-tier accounts allow up to **200 emails per month**.
+- When offline or if the quota is reached, status switches to `Fallback`, allowing master bypass PINs (`1234` for onboarding) and queuing alerts for retry upon reconnecting.
+
+### 3. SECURITY NOTE
+> [!WARNING]
+> EmailJS Service ID, Template ID, and Public Key are visible in the client browser bundle and in source configuration. The dashboard owner must:
+> 1. Restrict allowed origins / domain whitelisting in the EmailJS Dashboard settings.
+> 2. **NEVER** expose or configure the EmailJS Private Key in the client app.
+> 3. Rotate keys if the repository is made publicly accessible.
+
+### 4. Network Exception Disclosure
+The previous strict "no network calls" rule now contains this single, explicitly documented exception: outgoing HTTPS requests to `https://api.emailjs.com` for emergency guardian dispatches. All media files, encryption keys, and plaintext records are strictly withheld from network payloads.
 
 ---
 

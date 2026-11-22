@@ -1,12 +1,12 @@
 {
-  "name": "Ghar-Kharcha",
-  "short_name": "Ghar-Kharcha",
-  "description": "Daily grocery expense calculator with quick bill tagging.",
+  "name": "Buddy",
+  "short_name": "Buddy",
+  "description": "Your private everyday space.",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#FFF6EA",
-  "theme_color": "#FFF6EA",
+  "background_color": "#F4F8F8",
+  "theme_color": "#2F6F73",
   "icons": [
     {
       "src": "/icons/icon-192.png",

@@ -16,6 +16,7 @@ export const CasePacket: React.FC = () => {
   const [packet, setPacket] = useState<CasePacketData | null>(null);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [sentSummary, setSentSummary] = useState<string>('');
 
   useEffect(() => {
     const existing = getActiveCasePacket();
@@ -30,8 +31,13 @@ export const CasePacket: React.FC = () => {
     if (!packet || sent || sending) return;
     setSending(true);
     try {
-      await sendPacketToGuardians(packet);
+      const res = await sendPacketToGuardians(packet);
       setSent(true);
+      if (res.sentCount > 0) {
+        setSentSummary(t('casePacketSentDetail', { count: res.sentCount }));
+      } else {
+        setSentSummary(t('casePacketQueuedDemo'));
+      }
     } catch (err) {
       console.error('Failed to send case packet', err);
     } finally {
@@ -136,9 +142,16 @@ export const CasePacket: React.FC = () => {
         {/* Send to Guardians Action */}
         <div className="pt-1">
           {sent ? (
-            <div className="flex items-center gap-2 p-2.5 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-semibold">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>{t('casePacketSent')}</span>
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2 p-2.5 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-semibold">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>{t('casePacketSent')}</span>
+              </div>
+              {sentSummary && (
+                <p className="text-[11px] text-center text-gray-500 font-medium">
+                  {sentSummary}
+                </p>
+              )}
             </div>
           ) : (
             <button

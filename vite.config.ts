@@ -7,7 +7,7 @@ const productionCspPlugin = (): Plugin => ({
   name: 'production-csp',
   apply: 'build',
   transformIndexHtml(html) {
-    const cspMeta = `<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self' data:; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">`;
+    const cspMeta = `<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self' data:; connect-src 'self' https://api.emailjs.com; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">`;
     return html.replace('</head>', `  ${cspMeta}\n  </head>`);
   },
 });
@@ -23,16 +23,17 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
         navigateFallback: '/index.html',
+        navigateFallbackDenylist: [/^\/api/, /^https:\/\/api\.emailjs\.com/],
       },
       manifest: {
-        name: 'Ghar-Kharcha',
-        short_name: 'Ghar-Kharcha',
-        description: 'Daily grocery expense calculator with quick bill tagging.',
+        name: 'Buddy',
+        short_name: 'Buddy',
+        description: 'Your private everyday space.',
         start_url: '/',
         display: 'standalone',
         orientation: 'portrait',
-        background_color: '#FFF6EA',
-        theme_color: '#FFF6EA',
+        background_color: '#F4F8F8',
+        theme_color: '#2F6F73',
         icons: [
           {
             src: '/icons/icon-192.png',

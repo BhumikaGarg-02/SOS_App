@@ -4,6 +4,8 @@ import { useT } from '../../i18n/useT';
 import { useDemoLogStore } from '../../store/demoLogStore';
 import { useDemoFlagsStore } from '../../store/demoFlagsStore';
 import { saveGuardian, type GuardianRecord } from '../../lib/db';
+import { sendGuardianOtpEmail } from '../../services/emailAlertService';
+import { BuddyLogo } from '../../components/BuddyLogo';
 import { CheckCircle2, UserPlus, Users, Trash2 } from 'lucide-react';
 
 interface GuardiansProps {
@@ -18,9 +20,11 @@ interface GuardianItemState {
   contact: string;
   verified: boolean;
   otpCode?: string;
+  otpTimestamp?: number;
   enteredOtp?: string;
   wrongTries: number;
   otpSent: boolean;
+  otpStatus?: 'Sent' | 'Fallback' | 'Failed';
   error?: string;
 }
 
@@ -66,34 +70,50 @@ export const Guardians: React.FC<GuardiansProps> = ({ onNext, onBack }) => {
     return isMobile || isEmail;
   };
 
-  const handleSendOtp = (idx: number) => {
+  const handleSendOtp = async (idx: number) => {
     const g = guardians[idx];
     if (!g.name.trim() || !validateContact(g.contact)) {
       updateGuardian(idx, { error: 'Please enter a valid name and 10-digit mobile or email.' });
       return;
     }
 
-    // Generate 4-digit code (use 1234 on first try or random 4-digit)
-    const code = g.otpSent
-      ? Math.floor(1000 + Math.random() * 9000).toString()
-      : '1234';
+    // Generate random 4-digit code (kept in memory only, expires in 10 minutes)
+    const code = Math.floor(1000 + Math.random() * 9000).toString();
+
+    setLastOtpHint(code);
+    addLog(`OTP generated for ${g.name}: ${code}`, 'otp');
+
+    const sendRes = await sendGuardianOtpEmail(
+      { id: g.id, name: g.name.trim(), contact: g.contact.trim() },
+      code
+    );
 
     updateGuardian(idx, {
       otpCode: code,
+      otpTimestamp: Date.now(),
       otpSent: true,
+      otpStatus: sendRes.status,
       wrongTries: 0,
       error: undefined,
     });
-
-    setLastOtpHint(code);
-    addLog(`OTP sent to ${g.name}: ${code}`, 'otp');
   };
 
   const handleVerifyOtp = async (idx: number) => {
     const g = guardians[idx];
     if (!g.enteredOtp || !g.otpCode) return;
 
-    if (g.enteredOtp.trim() === g.otpCode) {
+    // Check 10-minute expiry
+    if (g.otpTimestamp && Date.now() - g.otpTimestamp > 10 * 60 * 1000) {
+      updateGuardian(idx, { error: t('otpExpired') });
+      return;
+    }
+
+    const entered = g.enteredOtp.trim();
+    // If Sent, accept ONLY the emailed code. If Fallback or Failed, also accept master fallback code "1234"
+    const isMasterFallbackAllowed = g.otpStatus !== 'Sent';
+    const isCorrect = entered === g.otpCode || (isMasterFallbackAllowed && entered === '1234');
+
+    if (isCorrect) {
       // Correct OTP
       const updated: GuardianItemState = {
         ...g,
@@ -118,14 +138,22 @@ export const Guardians: React.FC<GuardiansProps> = ({ onNext, onBack }) => {
       if (newWrongTries >= 3) {
         // Regenerate OTP after 3 wrong tries
         const newCode = Math.floor(1000 + Math.random() * 9000).toString();
+        setLastOtpHint(newCode);
+        addLog(`3 failed attempts for ${g.name}. New OTP generated: ${newCode}`, 'warn');
+
+        const sendRes = await sendGuardianOtpEmail(
+          { id: g.id, name: g.name.trim(), contact: g.contact.trim() },
+          newCode
+        );
+
         updateGuardian(idx, {
           otpCode: newCode,
+          otpTimestamp: Date.now(),
+          otpStatus: sendRes.status,
           enteredOtp: '',
           wrongTries: 0,
           error: '3 failed attempts. New OTP has been generated.',
         });
-        setLastOtpHint(newCode);
-        addLog(`3 failed attempts for ${g.name}. New OTP sent: ${newCode}`, 'warn');
       } else {
         updateGuardian(idx, {
           wrongTries: newWrongTries,
@@ -168,17 +196,20 @@ export const Guardians: React.FC<GuardiansProps> = ({ onNext, onBack }) => {
   const canContinue = verifiedCount >= 2;
 
   return (
-    <div className="flex flex-col h-full bg-[#FAFAF9] text-[#1C1917] justify-between p-4 sm:p-5 select-none overflow-y-auto">
+    <div className="flex flex-col h-full bg-[#F4F8F8] text-[#16302F] justify-between p-4 sm:p-5 select-none overflow-y-auto">
       {/* Top Header */}
       <div className="flex items-center justify-between pb-2 shrink-0">
-        <button
-          type="button"
-          onClick={onBack}
-          className="text-sm font-medium text-gray-500 hover:text-gray-800"
-        >
-          {t('back')}
-        </button>
-        <LangToggle />
+        <BuddyLogo size="sm" showWordmark={true} />
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={onBack}
+            className="text-sm font-medium text-gray-500 hover:text-gray-800"
+          >
+            {t('back')}
+          </button>
+          <LangToggle />
+        </div>
       </div>
 
       {/* Main Form */}
@@ -252,14 +283,19 @@ export const Guardians: React.FC<GuardiansProps> = ({ onNext, onBack }) => {
                       ))}
                     </select>
 
-                    <input
-                      type="text"
-                      placeholder={t('guardianContact')}
-                      value={g.contact}
-                      onChange={(e) => updateGuardian(idx, { contact: e.target.value, error: undefined })}
-                      className="h-10 px-3 text-sm rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-emerald-500 focus:outline-none"
-                    />
+                    <div>
+                      <input
+                        type="text"
+                        placeholder={t('guardianContact')}
+                        value={g.contact}
+                        onChange={(e) => updateGuardian(idx, { contact: e.target.value, error: undefined })}
+                        className="h-10 px-3 text-sm rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-emerald-500 focus:outline-none w-full"
+                      />
+                    </div>
                   </div>
+                  <p className="text-[10px] text-gray-500 leading-tight">
+                    {t('guardianEmailHelper')}
+                  </p>
 
                   {/* OTP Trigger / Verification */}
                   {!g.otpSent ? (
@@ -333,7 +369,7 @@ export const Guardians: React.FC<GuardiansProps> = ({ onNext, onBack }) => {
           type="button"
           disabled={!canContinue}
           onClick={onNext}
-          className="w-full h-12 bg-emerald-700 hover:bg-emerald-800 disabled:bg-gray-300 disabled:text-gray-500 text-white font-semibold rounded-2xl shadow-sm transition-all tap-target flex items-center justify-center text-base"
+          className="w-full h-12 bg-[#2F6F73] hover:bg-[#255a5d] disabled:bg-gray-300 disabled:text-gray-500 text-white font-semibold rounded-2xl shadow-sm transition-all tap-target flex items-center justify-center text-base"
         >
           {t('continue')}
         </button>

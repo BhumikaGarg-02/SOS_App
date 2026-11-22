@@ -30,6 +30,12 @@ export const Timeline: React.FC = () => {
 
   useEffect(() => {
     loadData();
+
+    const handleUpdate = () => {
+      loadData();
+    };
+    window.addEventListener('chuppi-evidence-updated', handleUpdate);
+    return () => window.removeEventListener('chuppi-evidence-updated', handleUpdate);
   }, [loadData]);
 
   // Handle selection for case packet

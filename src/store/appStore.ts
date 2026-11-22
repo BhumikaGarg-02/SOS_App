@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { useDemoLogStore } from './demoLogStore';
-import { startRingtone, stopRingtone } from '../lib/ringtone';
+import { startRingtone, stopRingtone, ensureAudioUnlocked } from '../lib/ringtone';
 
 export type ScreenType =
   | 'onboarding'
@@ -173,6 +173,7 @@ export const useAppStore = create<AppState>((set) => ({
   setReturnTo: (returnTo) => set({ returnTo }),
 
   startFakeCall: (delayMs = 5000) => {
+    ensureAudioUnlocked();
     if (fakeCallTimer) {
       clearTimeout(fakeCallTimer);
       fakeCallTimer = null;

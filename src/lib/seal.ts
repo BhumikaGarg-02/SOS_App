@@ -122,7 +122,13 @@ export async function createEvidence(input: CreateEvidenceInput): Promise<Eviden
 
 export async function verifySeal(id: string): Promise<SealVerifyResult> {
   const key = getSessionKey();
-  if (!key) throw new Error('No session key – vault must be unlocked');
+  if (!key) {
+    return {
+      ok: false,
+      checks: { content: false, seal: false, chainPrev: false, chainNext: false },
+      failedChecks: ['Vault is locked (no session key)'],
+    };
+  }
 
   const all = await getEvidence();
   const sorted = all.sort((a, b) => {

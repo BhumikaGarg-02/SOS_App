@@ -2,6 +2,13 @@ import { getEvidence, getGuardians, saveAlert, type EvidenceRecord, type AlertRe
 import { sha256Hex } from './crypto';
 import { useDemoLogStore } from '../store/demoLogStore';
 import { getEvidenceMeta } from './seal';
+import { sendAlertEmail } from '../services/emailAlertService';
+
+export interface SendPacketResult {
+  sentCount: number;
+  totalVerified: number;
+  summaryText: string;
+}
 
 export interface CasePacketEntry {
   id: string;
@@ -102,7 +109,7 @@ export function getActiveCasePacket(): CasePacketData | null {
   return activeCasePacket;
 }
 
-export async function sendPacketToGuardians(packet: CasePacketData): Promise<void> {
+export async function sendPacketToGuardians(packet: CasePacketData): Promise<SendPacketResult> {
   const allGuardians = await getGuardians();
   const verified = allGuardians.filter((g) => g.verified);
   const names = verified.length > 0
@@ -127,8 +134,18 @@ export async function sendPacketToGuardians(packet: CasePacketData): Promise<voi
 
   await saveAlert(alertRecord);
 
+  // Email metadata and hashes to verified guardians
+  const emailResults = await sendAlertEmail('CASE_SUMMARY_PACKET', { packet });
+  const sentCount = emailResults.filter((r) => r.status === 'Sent').length;
+
   useDemoLogStore.getState().addLog(
-    `Case packet queued for ${names} (simulated) — ID: ${packet.caseId}`,
+    `Case packet queued for ${names} — ID: ${packet.caseId} (Sent: ${sentCount}/${verified.length})`,
     'info'
   );
+
+  return {
+    sentCount,
+    totalVerified: verified.length,
+    summaryText: sentCount > 0 ? `Sent to ${sentCount} guardian(s)` : 'Queued (demo mode)',
+  };
 }

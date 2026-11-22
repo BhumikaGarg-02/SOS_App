@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Phone, PhoneOff } from 'lucide-react';
 import { useAppStore } from '../../store/appStore';
-import { stopRingtone } from '../../lib/ringtone';
+import { startRingtone, stopRingtone, ensureAudioUnlocked } from '../../lib/ringtone';
 import { useDemoLogStore } from '../../store/demoLogStore';
 import { useT } from '../../i18n/useT';
 
@@ -12,8 +12,10 @@ export const IncomingCall: React.FC = () => {
   const setScreen = useAppStore((s) => s.setScreen);
   const addLog = useDemoLogStore((s) => s.addLog);
 
-  // Stop ringtone if component unmounts
+  // Ensure audio is unlocked/resumed and start ringtone loop
   useEffect(() => {
+    ensureAudioUnlocked();
+    startRingtone();
     return () => {
       stopRingtone();
     };

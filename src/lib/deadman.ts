@@ -1,6 +1,7 @@
 import { useAppStore } from '../store/appStore';
 import { useDemoLogStore } from '../store/demoLogStore';
 import { dispatchGuardianAlert } from './sos';
+import { resetDeadmanEmailFlag } from '../services/emailAlertService';
 
 export type DeadmanSource =
   | 'grocery'
@@ -32,6 +33,7 @@ export function arm(source: DeadmanSource): void {
   const endsAt = Date.now() + durationMs;
 
   useAppStore.getState().setDeadmanEndsAt(endsAt);
+  resetDeadmanEmailFlag();
 
   useDemoLogStore
     .getState()

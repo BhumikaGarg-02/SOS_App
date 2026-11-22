@@ -1,7 +1,7 @@
 import React from 'react';
 import { LangToggle } from '../../components/LangToggle';
 import { useT } from '../../i18n/useT';
-import { ShoppingCart } from 'lucide-react';
+import { BuddyLogo } from '../../components/BuddyLogo';
 
 interface WelcomeProps {
   onNext: () => void;
@@ -11,21 +11,22 @@ export const Welcome: React.FC<WelcomeProps> = ({ onNext }) => {
   const { t } = useT();
 
   return (
-    <div className="flex flex-col h-full bg-[#FFF6EA] text-[#3B2A1A] justify-between p-6 select-none">
-      {/* Top bar with language toggle */}
-      <div className="flex justify-end pt-2">
+    <div className="flex flex-col h-full bg-[#F4F8F8] text-[#16302F] justify-between p-6 select-none">
+      {/* Top bar with Buddy logo wordmark and language toggle */}
+      <div className="flex items-center justify-between pt-2">
+        <BuddyLogo size="sm" showWordmark={true} />
         <LangToggle />
       </div>
 
       {/* Main card */}
       <div className="flex flex-col items-center text-center space-y-4 my-auto">
-        <div className="w-20 h-20 rounded-3xl bg-[#E07A2F] text-white flex items-center justify-center shadow-lg shadow-[#E07A2F]/20 mb-2">
-          <ShoppingCart className="w-10 h-10" />
+        <div className="mb-2">
+          <BuddyLogo size="xl" showWordmark={false} />
         </div>
-        <h1 className="font-heading text-3xl font-bold tracking-tight text-[#3B2A1A]">
+        <h1 className="font-heading text-3xl font-bold tracking-tight text-[#16302F]">
           {t('welcomeTitle')}
         </h1>
-        <p className="text-gray-600 max-w-[260px] text-base leading-relaxed">
+        <p className="text-gray-600 max-w-[280px] text-base leading-relaxed">
           {t('welcomeSubtitle')}
         </p>
       </div>
@@ -35,7 +36,7 @@ export const Welcome: React.FC<WelcomeProps> = ({ onNext }) => {
         <button
           type="button"
           onClick={onNext}
-          className="w-full h-12 bg-[#E07A2F] hover:bg-[#c96924] active:bg-[#b55c1e] text-white font-semibold rounded-2xl shadow-md transition-all tap-target flex items-center justify-center text-base"
+          className="w-full h-12 bg-[#2F6F73] hover:bg-[#255a5d] active:bg-[#1f4a4c] text-white font-semibold rounded-2xl shadow-md transition-all tap-target flex items-center justify-center text-base"
         >
           {t('getStarted')}
         </button>

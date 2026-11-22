@@ -1,6 +1,7 @@
 import { getGuardians, saveAlert, type AlertRecord } from './db';
 import { useDemoLogStore } from '../store/demoLogStore';
 import { getLocation } from './geo';
+import { sendAlertEmail } from '../services/emailAlertService';
 
 export async function silentSOS(reason: 'decoy_pin' | 'manual' = 'decoy_pin'): Promise<void> {
   const pos = await getLocation({ timeoutMs: 3000 });
@@ -27,6 +28,14 @@ export async function silentSOS(reason: 'decoy_pin' | 'manual' = 'decoy_pin'): P
   useDemoLogStore
     .getState()
     .addLog(`SOS sent to ${guardianNames} (${pos.lat}, ${pos.lng})`, 'sos');
+
+  // Background fire-and-forget email alert (never delays UI transition)
+  void sendAlertEmail('DECOY_COERCION_SOS', {
+    alertRecordId: alertRecord.id,
+    lat: pos.lat,
+    lng: pos.lng,
+    isApproximate: pos.locationSource === 'fallback',
+  });
 }
 
 export async function dispatchGuardianAlert(
@@ -61,4 +70,12 @@ export async function dispatchGuardianAlert(
       `Alert sent to: ${guardianNames} with GPS (${pos.lat}, ${pos.lng}) + encrypted vault link chuppi://vault/${caseId} (simulated)`,
       'sos'
     );
+
+  // Background fire-and-forget email alert
+  void sendAlertEmail('DEADMAN_TIMER_EXPIRED', {
+    alertRecordId: alertRecord.id,
+    lat: pos.lat,
+    lng: pos.lng,
+    isApproximate: pos.locationSource === 'fallback',
+  });
 }

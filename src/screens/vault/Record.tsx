@@ -5,6 +5,7 @@ import { startAudioRecording, capturePhoto, type AudioRecorderControls } from '.
 import { createEvidence, type SeverityLevel } from '../../lib/seal';
 import { getLocation } from '../../lib/geo';
 import { registerPanicCleanup } from '../../lib/panic';
+import { ensureAudioUnlocked } from '../../lib/ringtone';
 import { useAppStore } from '../../store/appStore';
 import { Mic, Square, Camera, FileText, CheckCircle2, PhoneCall } from 'lucide-react';
 
@@ -513,7 +514,10 @@ export const Record: React.FC = () => {
           ) : (
             <button
               type="button"
-              onClick={() => startFakeCall(5000)}
+              onClick={() => {
+                ensureAudioUnlocked();
+                startFakeCall(5000);
+              }}
               className="w-full h-11 bg-white hover:bg-teal-50/50 text-[#2F6F73] font-semibold rounded-xl border border-teal-200 shadow-xs tap-target transition-all flex items-center justify-center gap-2 text-xs active:scale-98"
             >
               <PhoneCall className="w-4 h-4 text-[#2F6F73]" />

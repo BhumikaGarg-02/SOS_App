@@ -29,7 +29,10 @@ export interface AlertRecord {
   lng: number;
   recipients: string[];
   payloadSummary: string;
-  simulated: true;
+  simulated: boolean;
+  emailStatus?: 'Sent' | 'Fallback' | 'Failed';
+  emailDetail?: string;
+  retryPending?: boolean;
 }
 
 interface ChuppiDB extends DBSchema {

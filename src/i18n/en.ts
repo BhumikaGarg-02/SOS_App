@@ -10,8 +10,8 @@ export const en = {
   lock: 'Lock',
 
   // Onboarding - Welcome
-  welcomeTitle: 'Ghar-Kharcha',
-  welcomeSubtitle: 'Set up your Ghar-Kharcha',
+  welcomeTitle: 'Welcome to Buddy',
+  welcomeSubtitle: "Let's set up your private space in a few quick steps.",
   getStarted: 'Get Started',
 
   // Onboarding - AgeGate
@@ -36,6 +36,8 @@ export const en = {
   minGuardiansReq: 'At least 2 verified guardians are required to continue',
   wrongOtp: 'Incorrect OTP. Try again.',
   otpSent: 'OTP code sent to contact',
+  guardianEmailHelper: 'Add an email so this person can receive alerts',
+  otpExpired: 'OTP expired. Please send a new code.',
 
   // Relations
   relMother: 'Mother',
@@ -196,8 +198,11 @@ export const en = {
   // Evidence card
   evidenceVerify: 'Verify Seal',
   evidenceVerifyPassing: '100% Untampered • Valid SHA-256 Hash',
+  evidenceVerifyTampered: 'TAMPERED • SHA-256 Hash Mismatch',
   evidenceVerifyFailed: 'Seal mismatch',
   evidenceVerifying: 'Verifying…',
+  tamperButton: 'Tamper',
+  restoreButton: 'Restore',
   evidenceLocationApprox: 'Location: approximate',
   evidenceLocationUnavailable: 'Location: unavailable',
   evidenceAddToCase: 'Add to Case Packet',
@@ -250,6 +255,26 @@ export const en = {
   timelineLoading: 'Loading records…',
   casePacketGenerating: 'Generating packet…',
   metadataOnly: 'Metadata & Hashes Only',
+  casePacketSentDetail: 'Sent to {count} guardian(s)',
+  casePacketQueuedDemo: 'Queued (demo mode)',
+
+  // Email Alerts
+  emailConfigTitle: 'Email Alerts (EmailJS)',
+  emailServiceId: 'Service ID',
+  emailTemplateId: 'Template ID',
+  emailPublicKey: 'Public Key',
+  emailSaveConfig: 'Save Override',
+  emailClearConfig: 'Clear Saved',
+  emailSavedOverride: 'Using saved override',
+  emailEnvDefault: 'Using env or default config',
+  emailTestRecipient: 'Recipient email',
+  emailSendTest: 'Send Test Email',
+  emailSending: 'Sending…',
+  emailDisclosure: "Email alerts send data through EmailJS to the recipient's mail provider. This is the only network traffic this app makes.",
+  emailSavedNotice: 'Email configuration saved',
+  emailClearedNotice: 'Reverted to default configuration',
+  emailTestSuccess: 'Test email sent successfully!',
+  emailTestFailed: 'Test email failed: {detail}',
 };
 
 export type TranslationKey = keyof typeof en;

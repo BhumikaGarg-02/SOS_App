@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useT } from '../../i18n/useT';
 import { useAppStore } from '../../store/appStore';
 import { getGuardians, resetDatabase, type GuardianRecord } from '../../lib/db';
+import { clearAllTamperBackups } from '../../lib/tamperDemo';
 import { LangToggle } from '../../components/LangToggle';
+import { EmailConfigSection } from '../../components/EmailConfigSection';
 import {
   Clock,
   PhoneCall,
@@ -64,6 +66,7 @@ export const Settings: React.FC = () => {
   const handleResetApp = async () => {
     if (window.confirm(t('resetConfirm'))) {
       localStorage.clear();
+      await clearAllTamperBackups();
       await resetDatabase();
       window.location.reload();
     }
@@ -228,6 +231,9 @@ export const Settings: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* 5. Email Alerts (EmailJS) Section */}
+      <EmailConfigSection compact={true} />
 
       {/* 5. Reset App */}
       <div className="bg-red-50/70 p-4 rounded-2xl border border-red-200 space-y-2">

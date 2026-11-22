@@ -12,8 +12,8 @@ export const hi: Record<TranslationKey, string> = {
   lock: 'लॉक करें',
 
   // Onboarding - Welcome
-  welcomeTitle: 'घर-खर्चा',
-  welcomeSubtitle: 'अपना घर-खर्चा हिसाब शुरू करें',
+  welcomeTitle: 'बडी में आपका स्वागत है',
+  welcomeSubtitle: 'कुछ आसान कदमों में अपनी निजी जगह तैयार करें।',
   getStarted: 'शुरू करें',
 
   // Onboarding - AgeGate
@@ -38,6 +38,8 @@ export const hi: Record<TranslationKey, string> = {
   minGuardiansReq: 'आगे बढ़ने के लिए कम से कम 2 सत्यापित संरक्षक आवश्यक हैं',
   wrongOtp: 'गलत ओटीपी। पुनः प्रयास करें।',
   otpSent: 'ओटीपी कोड संपर्क पर भेजा गया',
+  guardianEmailHelper: 'ईमेल जोड़ें ताकि इस व्यक्ति को अलर्ट प्राप्त हो सकें',
+  otpExpired: 'ओटीपी समाप्त हो गया है। कृपया नया कोड भेजें।',
 
   // Relations
   relMother: 'माँ',
@@ -198,8 +200,11 @@ export const hi: Record<TranslationKey, string> = {
   // Evidence card
   evidenceVerify: 'सील जाँचें',
   evidenceVerifyPassing: '100% अपरिवर्तित • मान्य SHA-256 हैश',
+  evidenceVerifyTampered: 'छेड़छाड़ पाई गई • SHA-256 हैश मेल नहीं खाता',
   evidenceVerifyFailed: 'सील मिलान विफल',
   evidenceVerifying: 'जाँच हो रही है…',
+  tamperButton: 'छेड़छाड़ (Tamper)',
+  restoreButton: 'पुनर्स्थापित करें (Restore)',
   evidenceLocationApprox: 'स्थान: अनुमानित',
   evidenceLocationUnavailable: 'स्थान: अनुपलब्ध',
   evidenceAddToCase: 'केस पैकेट में जोड़ें',
@@ -252,4 +257,24 @@ export const hi: Record<TranslationKey, string> = {
   timelineLoading: 'रिकॉर्ड लोड हो रहे हैं…',
   casePacketGenerating: 'पैकेट तैयार हो रहा है…',
   metadataOnly: 'केवल मेटाडेटा एवं हैश',
+  casePacketSentDetail: '{count} संरक्षक(कों) को भेजा गया',
+  casePacketQueuedDemo: 'कतारबद्ध (डेमो मोड)',
+
+  // Email Alerts
+  emailConfigTitle: 'ईमेल अलर्ट (EmailJS)',
+  emailServiceId: 'सर्विस आईडी',
+  emailTemplateId: 'टेम्पलेट आईडी',
+  emailPublicKey: 'पब्लिक की',
+  emailSaveConfig: 'सेटिंग्स सुरक्षित करें',
+  emailClearConfig: 'सहेजा गया हटाएं',
+  emailSavedOverride: 'सहेजे गए मान का उपयोग हो रहा है',
+  emailEnvDefault: 'डिफ़ॉल्ट / env कॉन्फ़िगरेशन सक्रिय',
+  emailTestRecipient: 'प्राप्तकर्ता ईमेल',
+  emailSendTest: 'परीक्षण ईमेल भेजें',
+  emailSending: 'भेज रहे हैं…',
+  emailDisclosure: 'ईमेल अलर्ट EmailJS के माध्यम से प्राप्तकर्ता के मेल प्रदाता को डेटा भेजते हैं। यह इस ऐप का एकमात्र नेटवर्क ट्रैफ़िक है।',
+  emailSavedNotice: 'ईमेल कॉन्फ़िगरेशन सहेजा गया',
+  emailClearedNotice: 'डिफ़ॉल्ट कॉन्फ़िगरेशन पर वापस सेट किया गया',
+  emailTestSuccess: 'परीक्षण ईमेल सफलतापूर्वक भेजा गया!',
+  emailTestFailed: 'परीक्षण ईमेल विफल: {detail}',
 };

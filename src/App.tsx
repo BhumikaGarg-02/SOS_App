@@ -18,8 +18,13 @@ import { ActiveCall } from './screens/call/ActiveCall';
 import { initPanicListeners } from './lib/panic';
 import { initDeadmanWatcher } from './lib/deadman';
 import { ensureAudioUnlocked } from './lib/ringtone';
+import { initEmailAlertService } from './services/emailAlertService';
+import { useDynamicIdentity } from './lib/identity';
+import { initTamperBackups } from './lib/tamperDemo';
 
 export const App: React.FC = () => {
+  useDynamicIdentity();
+
   const screen = useAppStore((s) => s.screen);
   const cover = useAppStore((s) => s.cover);
   const setupComplete = useAppStore((s) => s.setupComplete);
@@ -30,6 +35,8 @@ export const App: React.FC = () => {
   useEffect(() => {
     initPanicListeners();
     initDeadmanWatcher();
+    initEmailAlertService();
+    initTamperBackups();
 
     const handleFirstInteraction = () => {
       ensureAudioUnlocked();

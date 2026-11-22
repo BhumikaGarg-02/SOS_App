@@ -3,6 +3,7 @@ import { LangToggle } from '../../components/LangToggle';
 import { useT } from '../../i18n/useT';
 import { hashPin } from '../../lib/crypto';
 import { setSetting } from '../../lib/db';
+import { BuddyLogo } from '../../components/BuddyLogo';
 import { KeyRound, Eye, EyeOff } from 'lucide-react';
 
 interface SetPinsProps {
@@ -71,17 +72,20 @@ export const SetPins: React.FC<SetPinsProps> = ({ onNext, onBack }) => {
     /^\d{4}$/.test(realPin) && /^\d{4}$/.test(decoyPin) && realPin !== decoyPin;
 
   return (
-    <div className="flex flex-col h-full bg-[#FAFAF9] text-[#1C1917] justify-between p-6 select-none overflow-y-auto">
+    <div className="flex flex-col h-full bg-[#F4F8F8] text-[#16302F] justify-between p-6 select-none overflow-y-auto">
       {/* Top Header */}
       <div className="flex items-center justify-between pb-2 shrink-0">
-        <button
-          type="button"
-          onClick={onBack}
-          className="text-sm font-medium text-gray-500 hover:text-gray-800"
-        >
-          {t('back')}
-        </button>
-        <LangToggle />
+        <BuddyLogo size="sm" showWordmark={true} />
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={onBack}
+            className="text-sm font-medium text-gray-500 hover:text-gray-800"
+          >
+            {t('back')}
+          </button>
+          <LangToggle />
+        </div>
       </div>
 
       {/* Main Form */}
@@ -163,12 +167,12 @@ export const SetPins: React.FC<SetPinsProps> = ({ onNext, onBack }) => {
       </div>
 
       {/* Continue */}
-      <div className="pb-4 pt-4">
+      <div className="pb-4 pt-4 shrink-0">
         <button
           type="button"
           disabled={!isFormValid || saving}
           onClick={handleContinue}
-          className="w-full h-12 bg-emerald-700 hover:bg-emerald-800 disabled:bg-gray-300 disabled:text-gray-500 text-white font-semibold rounded-2xl shadow-sm transition-all tap-target flex items-center justify-center text-base"
+          className="w-full h-12 bg-[#2F6F73] hover:bg-[#255a5d] disabled:bg-gray-300 disabled:text-gray-500 text-white font-semibold rounded-2xl shadow-sm transition-all tap-target flex items-center justify-center text-base"
         >
           {saving ? 'Securing...' : t('continue')}
         </button>
